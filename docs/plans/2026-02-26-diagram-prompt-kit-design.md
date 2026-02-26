@@ -51,7 +51,10 @@ Structured in five sections:
 - Background: vertical linear gradient (`#f7f9fc` to `#ebeef4`)
 - Drop shadows: `feGaussianBlur` filter on `<rect>` elements only, NOT on `<g>` (rasterizes text)
 - Fonts: `sans-serif` throughout, no web font dependencies
+- Canvas: default `viewBox="0 0 800 600"`, snap coordinates to a 20px grid
 - Positioning: absolute via `transform="translate(x,y)"`, not relative layout
+- Text wrapping: hard-wrap label text at ~25 characters using `<tspan x="..." dy="1.2em">`; LLMs cannot calculate rendered string width
+- Arrows: start and end coordinates attach to bounding box edges of Nodes, not their centers
 - Groups ordered in DOM to match natural reading/reveal order
 - `data-role` attribute on primitives (`node`, `arrow`, `label`, `panel`, `axis`, `zone`)
 - Self-contained: no external references
@@ -106,8 +109,9 @@ diagram-prompt-kit/
 
 1. User copies `prompt-context.md` into LLM conversation (or includes as project context)
 2. User says: "Create a [scene type] diagram about [topic]. Nodes: [list]. Colors: [assignments]. Prefix: `xyz`. ViewBox: [dimensions]."
-3. LLM produces SVG following primitives, scene type, rules, and palette
-4. Minimal iteration — the context did the heavy lifting
+3. User asks the LLM to first calculate x,y coordinates and dimensions for all elements to ensure they fit within the viewBox, then output the SVG
+4. LLM produces SVG following primitives, scene type, rules, and palette
+5. Minimal iteration — the context did the heavy lifting
 
 ## Out of scope (v1)
 
@@ -121,10 +125,10 @@ diagram-prompt-kit/
 ## Future directions
 
 - **Composability**: Document integration with Rough Notation (hand-drawn annotations), GSAP ScrollTrigger (scroll-driven reveal), RoughJS (sketch style), Anime.js (simpler animations), Leader Line (cross-element connections)
-- **MCP server**: Serve the design system as tools (`get_archetype`, `validate_svg`, `get_palette`)
+- **MCP server**: Serve the design system as tools (`get_archetype`, `validate_svg`, `get_palette`). Key mechanism: `get_archetype` feeds reference SVGs as few-shot examples alongside the palette, giving the LLM concrete visual targets rather than just prose rules.
 - **Color Theory MCP**: Integrate for palette customization and WCAG validation
 - **Cross-model testing**: Validate findings with GPT-4, Gemini, and document model-specific behaviors
-- **Blog post**: Write about the approach — "How I make diagrams with LLMs"
+- **Blog post**: Write about the approach — "How I make diagrams with LLMs." `findings.md` is the backbone here — empirical data on LLM SVG capabilities is novel and high-signal for distribution (HN, tech Twitter)
 
 ## Landscape context
 
