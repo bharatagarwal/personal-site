@@ -269,6 +269,86 @@ function enableImgLightense() {
       target.style.cursor = 'zoom-in';
       target.addEventListener('click', () => showSvgLightbox(i));
     });
+
+    // Video lightbox: click to expand, arrow keys to navigate
+    const videoClips = [];
+    document.querySelectorAll('.video-clip').forEach(fig => {
+      const video = fig.querySelector('video');
+      if (!video) return;
+      const caption = fig.querySelector('figcaption')?.textContent || '';
+      const idx = videoClips.length;
+      videoClips.push({ src: video.src, caption });
+      fig.addEventListener('click', () => showVideoLightbox(idx));
+    });
+
+    let videoOverlay = null;
+    let videoIndex = -1;
+
+    function showVideoLightbox(index) {
+      if (videoOverlay) {
+        videoOverlay.querySelector('video')?.pause();
+        videoOverlay.remove();
+      }
+
+      videoIndex = index;
+      const clip = videoClips[index];
+      const overlay = document.createElement('div');
+      overlay.className = 'video-lightbox-overlay';
+
+      const v = document.createElement('video');
+      v.src = clip.src;
+      v.autoplay = true;
+      v.muted = false;
+      v.loop = true;
+      v.playsInline = true;
+      v.controls = false;
+      overlay.append(v);
+
+      if (clip.caption) {
+        const cap = document.createElement('div');
+        cap.className = 'video-lightbox-caption';
+        cap.textContent = clip.caption;
+        overlay.append(cap);
+      }
+
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeVideoLightbox();
+      });
+
+      videoOverlay = overlay;
+      document.body.append(overlay);
+    }
+
+    function closeVideoLightbox() {
+      if (!videoOverlay) return;
+      videoOverlay.querySelector('video')?.pause();
+      videoOverlay.remove();
+      videoOverlay = null;
+      videoIndex = -1;
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement && videoOverlay) closeVideoLightbox();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (!videoOverlay) return;
+      if (e.key === 'Escape') {
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else {
+          closeVideoLightbox();
+        }
+      } else if (e.key === 'ArrowRight' && videoIndex < videoClips.length - 1) {
+        showVideoLightbox(videoIndex + 1);
+      } else if (e.key === 'ArrowLeft' && videoIndex > 0) {
+        showVideoLightbox(videoIndex - 1);
+      } else if (e.key === 'f') {
+        if (!document.fullscreenElement) {
+          videoOverlay.querySelector('video')?.requestFullscreen();
+        }
+      }
+    });
   });
 }
 

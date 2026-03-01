@@ -1,0 +1,27 @@
+<nav class="stage-nav" aria-label="article stage">
+  <div class="stage-nav-pills">
+    {% if current == 0 %}
+      <span class="stage-pill active" aria-current="page"><span class="stage-n">0</span> Raw Synthesis</span>
+    {% elif latest >= 0 %}
+      <a class="stage-pill" href="/posts/{{ slug }}/"><span class="stage-n">0</span> Raw Synthesis</a>
+    {% else %}
+      <span class="stage-pill disabled"><span class="stage-n">0</span> Raw Synthesis</span>
+    {% endif %}
+
+    {% if current == 1 %}
+      <span class="stage-pill active" aria-current="page"><span class="stage-n">1</span> First Pass</span>
+    {% elif latest >= 1 %}
+      <a class="stage-pill" href="/posts/{{ slug }}-v1/"><span class="stage-n">1</span> First Pass</a>
+    {% else %}
+      <span class="stage-pill disabled"><span class="stage-n">1</span> First Pass</span>
+    {% endif %}
+
+    {% if current == 2 %}
+      <span class="stage-pill active" aria-current="page"><span class="stage-n">2</span> Editor's Cut</span>
+    {% elif latest >= 2 %}
+      <a class="stage-pill" href="/posts/{{ slug }}-v2/"><span class="stage-n">2</span> Editor's Cut</a>
+    {% else %}
+      <span class="stage-pill disabled"><span class="stage-n">2</span> Editor's Cut</span>
+    {% endif %}
+  </div>
+</nav>
