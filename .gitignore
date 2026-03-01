@@ -12,3 +12,9 @@ editor/node_modules/
 editor/.svelte-kit/
 
 .firecrawl/
+
+# Large media (local only, not tracked)
+static/video/
+static/img/gastown/
+
+INSIGHTS.md
