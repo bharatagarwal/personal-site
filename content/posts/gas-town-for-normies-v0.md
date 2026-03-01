@@ -1,5 +1,6 @@
 +++
 title = "Gas Town for Normies"
+slug = "gas-town-for-normies"
 date = "2026-02-24"
 
 [taxonomies]
@@ -8,7 +9,10 @@ tags = []
 [extra]
 featured = false
 toc = false
+stage = 0
 +++
+{{ stage_nav(slug="gas-town-for-normies", current=0, latest=0) }}
+
 *An experiment in coaching software with the playbooks of sports coaches Bill Belichick and Vince Lombardi. The former emphasizes standards and role clarity; the latter, the importance of strong fundamentals.*
 
 *This is how I’ve been doing work distribution within my team, and I have been surprisingly impressed with the results I’m getting.*
@@ -43,7 +47,6 @@ You cannot execute if you don’t know where the boundaries are. Gas Town organi
 
 **The Execution:** You operate inside the Town, but project work does not happen at the Town level. It is purely structural.
 
-> `[ 📸 FILM PLACEHOLDER: Wide cinematic shot of Gas Town from the movie Furiosa, showing the massive industrial smokestacks, fire, and gates. ]`
 
 ### The Rig
 
@@ -57,7 +60,6 @@ You cannot execute if you don’t know where the boundaries are. Gas Town organi
 
 Gas Town reads your current working directory to know which Rig you are in.
 
-> `[ 📸 FILM PLACEHOLDER: A wide, dusty shot of the armored War Rig tearing across the desert wasteland in Fury Road. ]`
 
 > `[ 📐 DIAGRAM 1: THE BOUNDARY MAP ]`
 > ****What to illustrate:** A large outer container representing "The Town". Outside of the sub-containers, place the Mayor and the Deacon. Inside the Town, draw distinct, isolated inner containers representing specific "Rigs" (Rig A, Rig B). Inside each Rig container, place its local managers (Witness, Refinery) at the top, and its laborers (Crew, Polecats) at the bottom. 
@@ -77,7 +79,6 @@ We maintain a strict separation between infrastructure and labor. Blurring these
 
 **The Execution:** There is only one Mayor per Town. It routes high-level traffic, coordinates cross-rig operations, and manages global state.
 
-> `[ 📸 FILM PLACEHOLDER: The People Eater from Fury Road, wearing his chaotic business suit and counting his ledgers. ]`
 
 ### The Deacon
 
@@ -87,7 +88,6 @@ We maintain a strict separation between infrastructure and labor. Blurring these
 
 **The Execution:** The Deacon operates quietly in the background, maintaining system health across the entire Town through a relentless watchdog chain.
 
-> `[ 📸 FILM PLACEHOLDER: A War Boy mechanic making the V8 hand sign in reverence to a massive, exposed car engine. ]`
 
 ### The Witness
 
@@ -99,7 +99,6 @@ We maintain a strict separation between infrastructure and labor. Blurring these
 
 When a temporary worker finishes its job, it essentially asks to be “witnessed” before it terminates.
 
-> `[ 📸 FILM PLACEHOLDER: Nux (or another War Boy) with chrome spray paint on his mouth, screaming "Witness me!" with a fanatic look in his eyes. ]`
 
 ### The Refinery
 
@@ -109,7 +108,6 @@ When a temporary worker finishes its job, it essentially asks to be “witnessed
 
 **The Execution:** The Refinery operates per-Rig. Once the Witness verifies a worker’s code, the Refinery handles the strict integration of that work into the Rig’s main branch.
 
-> `[ 📸 FILM PLACEHOLDER: Close-up of the fiery, grinding industrial refining machines inside Gas Town. ]`
 
 ---
 
@@ -127,7 +125,6 @@ These roles perform the actual project work. You must assign the right player to
 
 They are assigned a discrete task within a Rig, they spawn into an isolated workspace, execute the code, and systematically dismantle themselves upon completion.
 
-> `[ 📸 FILM PLACEHOLDER: A War Boy polecat swinging down on a massive, bending pendulum pole during the high-speed chase scene in Fury Road. ]`
 
 ### The Crew
 
@@ -137,7 +134,6 @@ They are assigned a discrete task within a Rig, they spawn into an isolated work
 
 **The Execution:** These are long-lived workspaces managed by human operators or stateful agents. Use a Crew for exploratory work, architectural planning, and tasks requiring sustained context and judgment.
 
-> `[ 📸 FILM PLACEHOLDER: Max and Furiosa working together intensely inside the cramped, gritty cab of the War Rig. ]`
 
 ### The Dog
 
@@ -149,7 +145,6 @@ They are assigned a discrete task within a Rig, they spawn into an isolated work
 
 **They are not project workers.** Do not assign a Dog to write feature code.
 
-> `[ 📸 FILM PLACEHOLDER: Max's Blue Heeler dog sitting alert and guarding the V8 Interceptor in the wasteland. ]`
 
 ---
 
@@ -165,7 +160,6 @@ If you cannot measure it, you cannot manage it. We track work systematically.
 
 **The Execution:** The atomic unit of work is a Bead. Every Bead belongs strictly to one Rig (e.g., `gp-123` belongs to the Greenplace rig). When a Bead is placed on an agent’s Hook, it is assigned.
 
-> `[ 📸 FILM PLACEHOLDER: A heavy, rusted grappling hook slamming into the metal side of a speeding wasteland vehicle. ]`
 
 ### The Convoy
 
@@ -175,7 +169,6 @@ If you cannot measure it, you cannot manage it. We track work systematically.
 
 **The Execution:** When you initiate batched work (`gt convoy create`), you create a Convoy. It acts as your dashboard, eliminating blind spots and notifying you when the entire batch lands.
 
-> `[ 📸 FILM PLACEHOLDER: Immortan Joe's massive armada of heavily modified vehicles tearing across the desert in a wide formation, kicking up dust. ]`
 
 > `[ 📐 DIAGRAM 2: THE ROUTING MATRIX ]`
 > ****What to illustrate:** A top-down flow. Start with a single "Convoy" block at the top. Show it breaking apart into three individual "Bead" blocks. Draw hard routing arrows from the Beads to specific Rigs based on a data prefix: e.g., Bead `gp-123` routes directly to the Greenplace Rig's Hook; Bead `hq-456` routes to the Town HQ Hook.
