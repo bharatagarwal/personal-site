@@ -11,7 +11,7 @@ featured = false
 toc = false
 stage = 0
 +++
-{{ stage_nav(slug="gas-town-for-normies", current=0, latest=0) }}
+`#raw-synthesis`
 
 *An experiment in coaching software with the playbooks of sports coaches Bill Belichick and Vince Lombardi. The former emphasizes standards and role clarity; the latter, the importance of strong fundamentals.*
 

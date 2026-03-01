@@ -13,9 +13,7 @@ toc = false
 stage = 0
 +++
 
-{{ stage_nav(slug="learn-by-scalpel", current=0, latest=0) }}
-
-*Written by Claude Opus 4.6. Unedited raw synthesis — Stage 0.*
+*Written by Claude Opus 4.6. Unedited raw synthesis.* `#raw-synthesis`
 
 A method for learning hard things by editing, not writing.
 
