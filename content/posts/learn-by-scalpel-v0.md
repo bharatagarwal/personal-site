@@ -8,6 +8,7 @@ description = "A method for learning hard things by editing, not writing."
 tags = ["ai", "learning"]
 
 [extra]
+featured = true
 toc = false
 stage = 0
 +++

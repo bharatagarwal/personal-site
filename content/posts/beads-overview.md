@@ -7,7 +7,7 @@ description = "Synthesized from Steve Yegge's Beads series on agent memory and i
 tags = [ "ai-written", "ai-agents" ]
 
 [extra]
-featured = false
+featured = true
 toc = false
 +++
 *Synthesized from Steve Yegge's Beads series, October–November 2025. Written by Claude Opus 4.6, edited by Bharat.*
