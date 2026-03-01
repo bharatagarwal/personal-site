@@ -4,14 +4,13 @@ slug = "gas-town-for-normies"
 date = "2026-02-24"
 
 [taxonomies]
-tags = []
+tags = ["raw-synthesis"]
 
 [extra]
 featured = false
 toc = false
 stage = 0
 +++
-`#raw-synthesis`
 
 *An experiment in coaching software with the playbooks of sports coaches Bill Belichick and Vince Lombardi. The former emphasizes standards and role clarity; the latter, the importance of strong fundamentals.*
 

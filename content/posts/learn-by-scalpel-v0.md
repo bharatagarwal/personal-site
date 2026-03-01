@@ -5,7 +5,7 @@ date = "2026-03-01"
 description = "A method for learning hard things by editing, not writing."
 
 [taxonomies]
-tags = ["ai", "learning"]
+tags = ["ai", "learning", "raw-synthesis"]
 
 [extra]
 featured = true
@@ -13,7 +13,7 @@ toc = false
 stage = 0
 +++
 
-*Written by Claude Opus 4.6. Unedited raw synthesis.* `#raw-synthesis`
+*Written by Claude Opus 4.6. Unedited raw synthesis.*
 
 A method for learning hard things by editing, not writing.
 
