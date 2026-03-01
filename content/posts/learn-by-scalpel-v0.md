@@ -1,6 +1,6 @@
 +++
-title = "The Editor's Cut"
-slug = "the-editors-cut"
+title = "Learn by Scalpel"
+slug = "learn-by-scalpel"
 date = "2026-03-01"
 description = "A method for learning hard things by editing, not writing."
 
@@ -12,7 +12,7 @@ toc = false
 stage = 0
 +++
 
-{{ stage_nav(slug="the-editors-cut", current=0, latest=0) }}
+{{ stage_nav(slug="learn-by-scalpel", current=0, latest=0) }}
 
 *Written by Claude Opus 4.6. Unedited raw synthesis — Stage 0.*
 
@@ -39,7 +39,7 @@ The output has two layers: the base text (authoritative, structured, comprehensi
 
 ## Why this works for technical people
 
-Technical people are trained evaluators. Code review, architecture review, PR feedback — the skill of reading something critically and improving it is already in the muscle memory. The Editor's Cut repurposes that skill for learning.
+Technical people are trained evaluators. Code review, architecture review, PR feedback — the skill of reading something critically and improving it is already in the muscle memory. Learn by Scalpel repurposes that skill for learning.
 
 It also solves the cold-start problem. The hardest part of learning a new domain is generating enough initial structure to have something to react to. AI synthesis gives you that structure immediately. You skip the blank page and go straight to the part where you're engaging with the material — interrogating it, reshaping it, pushing back on it.
 
@@ -49,7 +49,7 @@ The method works best in stretch territory: topics where you have enough adjacen
 
 It's not asking AI to write your blog post. The AI draft is raw material, not finished product. An unedited AI synthesis is commodity content — comprehensive, fluent, and interchangeable with what anyone else could generate from the same prompt. The editorial layer is what makes it valuable, because it contains the decisions, judgments, and connections that only you can make.
 
-It's also not the Feynman method. Feynman says: explain it simply to find your gaps. The Editor's Cut says: start with a complete explanation and discover what you actually think by deciding what to keep, what to cut, and what to challenge. Feynman works bottom-up from your current understanding. This works top-down from a synthesised overview. They're complementary, not competing.
+It's also not the Feynman method. Feynman says: explain it simply to find your gaps. Learn by Scalpel says: start with a complete explanation and discover what you actually think by deciding what to keep, what to cut, and what to challenge. Feynman works bottom-up from your current understanding. This works top-down from a synthesised overview. They're complementary, not competing.
 
 ## Publishing in stages
 
