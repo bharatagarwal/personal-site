@@ -7,7 +7,7 @@ description = "A technical retelling of the 2028 Global Intelligence Crisis scen
 tags = [ "ai" ]
 
 [extra]
-featured = true
+featured = false
 toc = false
 +++
 
