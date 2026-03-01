@@ -492,6 +492,18 @@ function enableMobileScrollToTop() {
   }, { passive: true });
 }
 
+// Apply Inter on non-Apple platforms; Apple devices get SF Pro via system-ui
+(function() {
+  var isApple = /Mac|iPhone|iPad|iPod/.test(navigator.platform)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (!isApple) {
+    document.body.style.setProperty('--main-font', "'Inter', system-ui, sans-serif");
+    document.body.style.letterSpacing = '-0.011em';
+    document.body.style.fontFeatureSettings = "'liga' 1, 'calt' 1, 'cv05' 1";
+    document.body.style.fontOpticalSizing = 'auto';
+  }
+})();
+
 enableThemeToggle();
 enablePrerender();
 enableRssMask();
