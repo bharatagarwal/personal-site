@@ -1,0 +1,1429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>How Pi's Extensibility Works</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #fafaf7;
+    --ink: #1f1d1b;
+    --ink-soft: #4a4742;
+    --rule: #cfccc4;
+    --moss: #4a6240;
+    --code-bg: #f1efe7;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Inter", -apple-system, "SF Pro Text", system-ui, sans-serif;
+    font-feature-settings: "ss01", "cv11";
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.65;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  strong, b { font-weight: 600; color: var(--ink); }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 120px 40px 160px;
+  }
+  header.hero {
+    margin-bottom: 120px;
+  }
+  .eyebrow {
+    color: var(--ink);
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 48px;
+    font-weight: 500;
+  }
+  h1 {
+    font-family: "Fraunces", "Iowan Old Style", "New York", Georgia, serif;
+    font-size: 56px;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin: 0 0 36px;
+    font-weight: 400;
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+    color: var(--ink);
+  }
+  .lede {
+    font-family: "Fraunces", "Iowan Old Style", "New York", Georgia, serif;
+    font-size: 21px;
+    color: var(--ink);
+    max-width: 620px;
+    margin: 0;
+    line-height: 1.5;
+    font-weight: 400;
+    font-variation-settings: "opsz" 24;
+  }
+  .lede strong { color: var(--ink); font-weight: 600; }
+
+  h2 {
+    font-family: "Fraunces", "Iowan Old Style", "New York", Georgia, serif;
+    font-size: 32px;
+    letter-spacing: -0.02em;
+    margin: 120px 0 16px;
+    font-weight: 500;
+    font-variation-settings: "opsz" 72;
+    color: var(--ink);
+    line-height: 1.2;
+    position: relative;
+  }
+  h2 .num {
+    position: absolute;
+    left: -64px;
+    top: 14px;
+    color: var(--ink-soft);
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+  h2 + .sub {
+    font-family: "Fraunces", "Iowan Old Style", "New York", Georgia, serif;
+    color: var(--ink-soft);
+    margin: 0 0 56px;
+    font-size: 18px;
+    font-weight: 400;
+    font-style: italic;
+    font-variation-settings: "opsz" 24;
+    max-width: 580px;
+    line-height: 1.5;
+  }
+
+  h3 {
+    font-size: 11px;
+    margin: 56px 0 16px;
+    font-weight: 600;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-family: "Inter", -apple-system, sans-serif;
+  }
+
+  p { margin: 0 0 20px; }
+  p code, li code, td code {
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--code-bg);
+    padding: 1px 6px;
+    font-weight: 500;
+  }
+
+  ul, ol { padding-left: 22px; }
+  ul li, ol li { margin-bottom: 10px; }
+  ul li::marker { color: var(--ink-soft); }
+  ol li::marker { color: var(--ink-soft); }
+
+  pre {
+    background: var(--code-bg);
+    padding: 24px 28px;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    margin: 28px 0;
+    color: var(--ink);
+    border-left: 1px solid var(--rule);
+  }
+  pre .k { color: var(--moss); }
+  pre .s { color: var(--ink-soft); }
+  pre .c { color: var(--ink-soft); font-style: italic; opacity: 0.7; }
+  pre .f { color: var(--ink); }
+  pre .n { color: var(--ink-soft); }
+  pre .p { color: var(--ink); }
+
+  .card {
+    padding: 0;
+    margin: 28px 0;
+    border-top: 1px solid var(--rule);
+    padding-top: 20px;
+  }
+  .card.tight { padding-top: 16px; }
+  .card .label {
+    color: var(--ink);
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .callout {
+    padding: 28px 0 8px;
+    margin: 40px 0;
+    color: var(--ink);
+    border-top: 1px solid var(--moss);
+  }
+  .callout .ttl {
+    color: var(--moss);
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 28px 0;
+    font-size: 14px;
+  }
+  th, td {
+    text-align: left;
+    padding: 14px 0;
+    padding-right: 24px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  th {
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 10px;
+  }
+  tr:last-child td { border-bottom: none; }
+
+  /* SVG and diagram containers */
+  .diagram {
+    margin: 48px 0;
+    overflow-x: auto;
+  }
+  .diagram svg { display: block; width: 100%; height: auto; }
+  /* Unified SVG typography — keeps every diagram in lockstep */
+  .diagram svg text {
+    font-family: "Inter", -apple-system, "SF Pro Text", sans-serif;
+    font-weight: 500;
+  }
+  .diagram svg text[font-family*="monospace"],
+  .diagram svg text[font-family*="Menlo"],
+  .diagram svg text[font-family*="JetBrains"] {
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace !important;
+    font-weight: 500;
+  }
+  .diagram svg text[font-weight="600"] { font-weight: 600 !important; }
+  .diagram .cap {
+    color: var(--ink-soft);
+    font-size: 12px;
+    margin-top: 20px;
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
+
+  /* Pipeline visual using flex boxes */
+  .pipeline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 24px 0;
+    align-items: stretch;
+  }
+  .pipeline .stage {
+    padding: 8px 12px;
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    color: var(--ink);
+    border: 1px solid var(--rule);
+  }
+  .pipeline .stage.hl { border-color: var(--moss); color: var(--moss); }
+  .pipeline .stage.tool { border-color: var(--ink); }
+  .pipeline .arrow { color: var(--ink-soft); align-self: center; font-size: 14px; }
+
+  .keyrow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    margin: 24px 0;
+    background: var(--rule);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .keyrow .pill {
+    background: var(--paper);
+    padding: 10px 12px;
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    text-align: center;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .keyrow .pill.a { color: var(--ink); }
+  .keyrow .pill.b { color: var(--ink); }
+  .keyrow .pill.c { color: var(--moss); }
+  .keyrow .pill.d { color: var(--ink); }
+
+  .eventgroup {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 32px;
+    padding: 20px 0;
+    border-top: 1px solid var(--rule);
+    align-items: baseline;
+  }
+  .eventgroup:last-of-type { border-bottom: 1px solid var(--rule); }
+  .eventgroup-label {
+    color: var(--ink);
+    font-family: "Inter", -apple-system, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+  .eventgroup-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+  }
+  .eventgroup-pills span {
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  @media (max-width: 720px) {
+    .eventgroup { grid-template-columns: 1fr; gap: 8px; }
+  }
+
+  .tldr {
+    padding: 32px 0 8px;
+    margin-bottom: 80px;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--rule);
+  }
+  .tldr h3 {
+    margin: 0 0 16px;
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+  }
+  .tldr ul { margin: 16px 0 8px; }
+  .tldr li { color: var(--ink); }
+  .tldr p { font-size: 16px; }
+
+  .twocol {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin: 24px 0;
+  }
+  @media (max-width: 720px) {
+    .twocol { grid-template-columns: 1fr; gap: 24px; }
+    h1 { font-size: 32px; }
+    h2 .num { position: static; display: block; margin-bottom: 8px; }
+    .wrap { padding: 80px 24px 100px; }
+  }
+
+  footer {
+    margin-top: 120px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-soft);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .anchor-toc {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 48px;
+  }
+  .anchor-toc a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    padding: 10px 0;
+    border-top: 1px solid var(--rule);
+    letter-spacing: 0.08em;
+    transition: color 0.12s;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+  .anchor-toc a:last-child { border-bottom: 1px solid var(--rule); }
+  .anchor-toc a::before {
+    content: attr(data-num);
+    color: var(--rule);
+    width: 24px;
+    font-size: 10px;
+  }
+  .anchor-toc a:hover {
+    color: var(--moss);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">Architecture · Pi</div>
+  <h1>How Pi's extensibility works</h1>
+  <p class="lede">
+    Pi is not a coding agent with a plugin API bolted on — it's an
+    <strong>inversion-of-control framework</strong> where a minimal core defers
+    nearly every behavioral decision to files in standard directories. Here is
+    the system in one read.
+  </p>
+  <nav class="anchor-toc">
+    <a href="#tldr" data-num="—">In one paragraph</a>
+    <a href="#flow" data-num="01">Lifecycle, end to end</a>
+    <a href="#events" data-num="02">Event pipeline</a>
+    <a href="#tools" data-num="03">Tool registry</a>
+    <a href="#resources" data-num="04">Resource discovery</a>
+    <a href="#prompt" data-num="05">System prompt</a>
+    <a href="#sessions" data-num="06">Session tree</a>
+    <a href="#tui" data-num="07">TUI surfaces</a>
+    <a href="#self" data-num="08">Self-modification</a>
+    <a href="#stale" data-num="09">Stale-object guards</a>
+    <a href="#webui" data-num="10">The web-ui split</a>
+    <a href="#lessons" data-num="11">Lessons for self-modifying software</a>
+  </nav>
+</header>
+
+<!-- ===================== TL;DR ===================== -->
+<section id="tldr" class="tldr">
+  <h3>The whole idea in one paragraph</h3>
+  <p style="margin:0">
+    A Pi turn is a <strong>pipeline</strong>, not a function call. Before the
+    LLM runs, before a tool executes, before a response is rendered — the core
+    pauses and asks the extension chain "anyone want to change this?"
+    Extensions are TypeScript files in <code>~/.pi/agent/extensions/</code> that
+    subscribe to lifecycle events. Each handler returns a value that flows into
+    the next handler, so behavior composes like middleware. The core has no
+    subagents, no plan mode, no permissions UI — those are all extensions.
+    Because everything is a file Pi's own <code>read</code>/<code>write</code>
+    tools can touch, Pi can <strong>extend itself</strong> at runtime via
+    <code>/reload</code>.
+  </p>
+  <ul style="margin-top:14px">
+    <li><strong>7 customization axes</strong> compose orthogonally: extensions, tools, resources, prompt, sessions, TUI, providers.</li>
+    <li><strong>29 event hooks</strong> span the full agent lifecycle with chained return values (middleware, not pub/sub).</li>
+    <li><strong>Files, not config</strong>: extensions, skills, prompts, themes, settings — all standard directories the agent's own tools can edit.</li>
+    <li><strong>Hot reload</strong>: <code>/reload</code> rebinds everything without dropping the session. Stale-object guards (<code>assertActive</code>) catch the subtle bugs this introduces.</li>
+    <li><strong>Tree-structured sessions</strong> make modification reversible — try a change, fork if it breaks, navigate back.</li>
+  </ul>
+</section>
+
+<!-- ===================== LIFECYCLE FLOW ===================== -->
+<section id="flow">
+  <h2><span class="num">01</span>The lifecycle, end-to-end</h2>
+  <p class="sub">Where extensions can plug in across a single user turn.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 900 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pi agent lifecycle diagram">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#2a2826"/>
+        </marker>
+        <marker id="arrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#5a6f4e"/>
+        </marker>
+      </defs>
+
+      <!-- Lanes -->
+      <text x="20" y="28" fill="#6b6863" font-family="ui-monospace,Menlo" font-size="11">USER</text>
+      <text x="20" y="148" fill="#6b6863" font-family="ui-monospace,Menlo" font-size="11">CORE</text>
+      <text x="20" y="298" fill="#6b6863" font-family="ui-monospace,Menlo" font-size="11">EXTENSIONS</text>
+      <text x="20" y="468" fill="#6b6863" font-family="ui-monospace,Menlo" font-size="11">PROVIDER</text>
+
+      <line x1="100" y1="40" x2="900" y2="40" stroke="#2a2826"/>
+      <line x1="100" y1="160" x2="900" y2="160" stroke="#2a2826"/>
+      <line x1="100" y1="310" x2="900" y2="310" stroke="#2a2826"/>
+      <line x1="100" y1="480" x2="900" y2="480" stroke="#2a2826"/>
+
+      <!-- User input -->
+      <rect x="110" y="10" width="120" height="40" rx="6" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="170" y="35" fill="#2a2826" font-size="12" text-anchor="middle" >user prompt</text>
+
+      <!-- Core: receive input -->
+      <rect x="110" y="120" width="130" height="44" rx="6" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="175" y="138" fill="#2a2826" font-size="12" text-anchor="middle">receive input</text>
+      <text x="175" y="154" fill="#6b6863" font-size="11" text-anchor="middle">AgentSession</text>
+
+      <!-- Ext: input event -->
+      <rect x="110" y="270" width="130" height="50" rx="6" fill="#fafaf7" stroke="#5a6f4e"/>
+      <text x="175" y="290" fill="#5a6f4e" font-size="12" text-anchor="middle" font-family="ui-monospace,Menlo">input</text>
+      <text x="175" y="306" fill="#6b6863" font-size="11" text-anchor="middle">transform / handle / pass</text>
+
+      <!-- Core: build prompt -->
+      <rect x="270" y="120" width="140" height="44" rx="6" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="340" y="138" fill="#2a2826" font-size="12" text-anchor="middle">build system prompt</text>
+      <text x="340" y="154" fill="#6b6863" font-size="11" text-anchor="middle">tools + skills + ctx</text>
+
+      <!-- Ext: before_agent_start, resources_discover -->
+      <rect x="270" y="270" width="140" height="50" rx="6" fill="#fafaf7" stroke="#5a6f4e"/>
+      <text x="340" y="290" fill="#5a6f4e" font-size="11" text-anchor="middle" font-family="ui-monospace,Menlo">before_agent_start</text>
+      <text x="340" y="306" fill="#6b6863" font-size="11" text-anchor="middle">rewrite systemPrompt</text>
+
+      <!-- Core: turn -->
+      <rect x="440" y="120" width="120" height="44" rx="6" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="500" y="138" fill="#2a2826" font-size="12" text-anchor="middle">turn loop</text>
+      <text x="500" y="154" fill="#6b6863" font-size="11" text-anchor="middle">assemble messages</text>
+
+      <!-- Ext: context -->
+      <rect x="440" y="270" width="120" height="50" rx="6" fill="#fafaf7" stroke="#5a6f4e"/>
+      <text x="500" y="290" fill="#5a6f4e" font-size="12" text-anchor="middle" font-family="ui-monospace,Menlo">context</text>
+      <text x="500" y="306" fill="#6b6863" font-size="11" text-anchor="middle">filter / inject msgs</text>
+
+      <!-- Core: provider call -->
+      <rect x="590" y="120" width="130" height="44" rx="6" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="655" y="138" fill="#2a2826" font-size="12" text-anchor="middle">call provider</text>
+      <text x="655" y="154" fill="#6b6863" font-size="11" text-anchor="middle">stream response</text>
+
+      <!-- Ext: before_provider_request -->
+      <rect x="590" y="270" width="130" height="50" rx="6" fill="#fafaf7" stroke="#5a6f4e"/>
+      <text x="655" y="288" fill="#5a6f4e" font-size="11" text-anchor="middle" font-family="ui-monospace,Menlo">before_provider_request</text>
+      <text x="655" y="304" fill="#6b6863" font-size="11" text-anchor="middle">inspect / replace payload</text>
+
+      <!-- Provider -->
+      <rect x="590" y="440" width="130" height="44" rx="6" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="655" y="465" fill="#2a2826" font-size="12" text-anchor="middle">LLM API</text>
+
+      <!-- Core: tool exec -->
+      <rect x="750" y="120" width="130" height="44" rx="6" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="815" y="138" fill="#2a2826" font-size="12" text-anchor="middle">tool dispatch</text>
+      <text x="815" y="154" fill="#6b6863" font-size="11" text-anchor="middle">read/edit/bash/...</text>
+
+      <!-- Ext: tool_call / tool_result -->
+      <rect x="750" y="260" width="130" height="70" rx="6" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="815" y="280" fill="#2a2826" font-size="11" text-anchor="middle" font-family="ui-monospace,Menlo">tool_call</text>
+      <text x="815" y="296" fill="#6b6863" font-size="11" text-anchor="middle">block / rewrite input</text>
+      <text x="815" y="316" fill="#2a2826" font-size="11" text-anchor="middle" font-family="ui-monospace,Menlo">tool_result</text>
+
+      <!-- Flow arrows top lane -->
+      <line x1="170" y1="50" x2="175" y2="118" stroke="#2a2826" stroke-width="1" marker-end="url(#arr)"/>
+      <line x1="240" y1="142" x2="268" y2="142" stroke="#2a2826" stroke-width="1" marker-end="url(#arr)"/>
+      <line x1="410" y1="142" x2="438" y2="142" stroke="#2a2826" stroke-width="1" marker-end="url(#arr)"/>
+      <line x1="560" y1="142" x2="588" y2="142" stroke="#2a2826" stroke-width="1" marker-end="url(#arr)"/>
+      <line x1="720" y1="142" x2="748" y2="142" stroke="#2a2826" stroke-width="1" marker-end="url(#arr)"/>
+
+      <!-- Core <-> Ext hookups (vertical) -->
+      <line x1="175" y1="164" x2="175" y2="268" stroke="#5a6f4e" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arrA)"/>
+      <line x1="340" y1="164" x2="340" y2="268" stroke="#5a6f4e" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arrA)"/>
+      <line x1="500" y1="164" x2="500" y2="268" stroke="#5a6f4e" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arrA)"/>
+      <line x1="655" y1="164" x2="655" y2="268" stroke="#5a6f4e" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arrA)"/>
+      <line x1="815" y1="164" x2="815" y2="258" stroke="#2a2826" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arrA)"/>
+
+      <!-- Provider call down -->
+      <line x1="655" y1="164" x2="655" y2="438" stroke="#2a2826" stroke-width="1" marker-end="url(#arr)"/>
+
+      <!-- Loop back -->
+      <path d="M 880 142 C 920 142 920 510 460 510 C 200 510 180 510 175 510 L 175 164" fill="none" stroke="#2a2826" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arr)"/>
+      <text x="460" y="525" fill="#6b6863" font-size="11" text-anchor="middle">next turn (loop until done)</text>
+    </svg>
+    <div class="cap">Each moss-outlined box is an extension hook. Handlers chain — handler N+1 sees handler N's output.</div>
+  </div>
+</section>
+
+<!-- ===================== EVENTS ===================== -->
+<section id="events">
+  <h2><span class="num">02</span>The event pipeline: middleware with backpressure</h2>
+  <p class="sub">29 events, all chained, most with structured return values.</p>
+
+  <p>
+    What separates Pi's events from a typical pub/sub plugin system: they're
+    not fire-and-forget. Each handler returns data that the next handler sees
+    and can transform. This is the <strong>Observer pattern applied as a
+    pipeline</strong>.
+  </p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 900 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Event pipeline chaining">
+      <defs>
+        <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#2a2826"/>
+        </marker>
+      </defs>
+
+      <text x="20" y="32" fill="#6b6863" font-family="ui-monospace,Menlo" font-size="12">tool_result fires →</text>
+
+      <rect x="40" y="60" width="180" height="76" rx="8" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="130" y="84" fill="#2a2826" font-size="13" text-anchor="middle">handler A</text>
+      <text x="130" y="108" fill="#6b6863" font-size="11" text-anchor="middle">e.g. permission-gate</text>
+      <text x="130" y="124" fill="#2a2826" font-size="11" text-anchor="middle" font-family="ui-monospace,Menlo">content += redacted</text>
+
+      <line x1="220" y1="98" x2="260" y2="98" stroke="#2a2826" stroke-width="1" marker-end="url(#arr2)"/>
+
+      <rect x="260" y="60" width="180" height="76" rx="8" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="350" y="84" fill="#2a2826" font-size="13" text-anchor="middle">handler B</text>
+      <text x="350" y="108" fill="#6b6863" font-size="11" text-anchor="middle">sees A's changes</text>
+      <text x="350" y="124" fill="#2a2826" font-size="11" text-anchor="middle" font-family="ui-monospace,Menlo">details = { summary }</text>
+
+      <line x1="440" y1="98" x2="480" y2="98" stroke="#2a2826" stroke-width="1" marker-end="url(#arr2)"/>
+
+      <rect x="480" y="60" width="180" height="76" rx="8" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="570" y="84" fill="#2a2826" font-size="13" text-anchor="middle">handler C</text>
+      <text x="570" y="108" fill="#6b6863" font-size="11" text-anchor="middle">sees A + B changes</text>
+      <text x="570" y="124" fill="#2a2826" font-size="11" text-anchor="middle" font-family="ui-monospace,Menlo">isError = false</text>
+
+      <line x1="660" y1="98" x2="700" y2="98" stroke="#2a2826" stroke-width="1" marker-end="url(#arr2)"/>
+
+      <rect x="700" y="60" width="160" height="76" rx="8" fill="#fafaf7" stroke="#5a6f4e"/>
+      <text x="780" y="92" fill="#5a6f4e" font-size="13" text-anchor="middle">final result</text>
+      <text x="780" y="112" fill="#6b6863" font-size="11" text-anchor="middle">sent to LLM</text>
+
+      <text x="450" y="190" fill="#6b6863" font-size="12" text-anchor="middle">Each handler mutates and returns — accumulated state flows downstream.</text>
+    </svg>
+  </div>
+
+  <h3>The four most powerful event types</h3>
+  <table>
+    <thead>
+      <tr><th>Event</th><th>What it can do</th><th>Real-world use</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>tool_call</code></td>
+        <td>Mutate <code>event.input</code> in place; return <code>{ block: true, reason }</code> to cancel.</td>
+        <td>Permission gates that rewrite dangerous paths.</td>
+      </tr>
+      <tr>
+        <td><code>context</code></td>
+        <td>Receives a deep copy of all messages before each LLM call. Filter, inject, or rewrite. Result chains.</td>
+        <td>Inject memory snippets; redact secrets.</td>
+      </tr>
+      <tr>
+        <td><code>before_agent_start</code></td>
+        <td>Return <code>{ systemPrompt }</code> to rewrite the prompt per-turn. Each handler sees the accumulated result.</td>
+        <td>Plan-mode injects <code>[PLAN MODE ACTIVE]</code> instructions.</td>
+      </tr>
+      <tr>
+        <td><code>input</code></td>
+        <td><code>{ action: "transform" }</code> rewrites, <code>"handled"</code> short-circuits the LLM, <code>"continue"</code> passes through.</td>
+        <td><code>/ping</code> returns "pong" without an API call.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card">
+    <div class="label">Code · a tool_call gate</div>
+<pre><span class="k">export default</span> <span class="k">function</span> <span class="f">myExtension</span>(api) {
+  api.<span class="f">on</span>(<span class="s">"tool_call"</span>, (event) =&gt; {
+    <span class="k">if</span> (event.toolName === <span class="s">"bash"</span> &amp;&amp; event.input.command.<span class="f">includes</span>(<span class="s">"rm -rf"</span>)) {
+      <span class="k">return</span> { block: <span class="k">true</span>, reason: <span class="s">"destructive command blocked"</span> };
+    }
+    <span class="c">// Rewrite arguments in place — no re-validation needed</span>
+    <span class="k">if</span> (event.toolName === <span class="s">"read"</span>) {
+      event.input.path = <span class="f">sanitize</span>(event.input.path);
+    }
+  });
+}</pre>
+  </div>
+
+  <h3>Full event catalog</h3>
+
+  <div class="eventgroup">
+    <div class="eventgroup-label">Session &amp; lifecycle</div>
+    <div class="eventgroup-pills">
+      <span>session_start</span>
+      <span>resources_discover</span>
+      <span>session_shutdown</span>
+      <span>session_before_switch</span>
+      <span>session_before_fork</span>
+      <span>session_before_compact</span>
+      <span>session_compact</span>
+      <span>session_before_tree</span>
+      <span>session_tree</span>
+    </div>
+  </div>
+
+  <div class="eventgroup">
+    <div class="eventgroup-label">Turn &amp; agent</div>
+    <div class="eventgroup-pills">
+      <span>before_agent_start</span>
+      <span>agent_start</span>
+      <span>agent_end</span>
+      <span>turn_start</span>
+      <span>turn_end</span>
+      <span>context</span>
+      <span>before_provider_request</span>
+      <span>after_provider_response</span>
+    </div>
+  </div>
+
+  <div class="eventgroup">
+    <div class="eventgroup-label">Tools</div>
+    <div class="eventgroup-pills">
+      <span>tool_execution_start</span>
+      <span>tool_call</span>
+      <span>tool_execution_update</span>
+      <span>tool_result</span>
+      <span>tool_execution_end</span>
+    </div>
+  </div>
+
+  <div class="eventgroup">
+    <div class="eventgroup-label">Input &amp; UX</div>
+    <div class="eventgroup-pills">
+      <span>input</span>
+      <span>user_bash</span>
+      <span>message_start</span>
+      <span>message_update</span>
+      <span>message_end</span>
+      <span>model_select</span>
+      <span>thinking_level_select</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TOOLS ===================== -->
+<section id="tools">
+  <h2><span class="num">03</span>The unified tool registry</h2>
+  <p class="sub">Built-in tools and extension tools are the same thing.</p>
+
+  <p>
+    Pi's built-ins (<code>read</code>, <code>bash</code>, <code>edit</code>,
+    <code>write</code>, <code>grep</code>, <code>find</code>, <code>ls</code>)
+    are just <code>ToolDefinition</code> objects in the same registry as
+    extension tools. The dispatch layer has zero special-casing.
+  </p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tool registry composition">
+      <defs>
+        <marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#2a2826"/>
+        </marker>
+      </defs>
+
+      <!-- Sources -->
+      <rect x="20" y="30" width="180" height="60" rx="8" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="110" y="56" fill="#2a2826" font-size="13" text-anchor="middle">1. Built-in tools</text>
+      <text x="110" y="76" fill="#6b6863" font-size="11" text-anchor="middle">read · bash · edit · write...</text>
+
+      <rect x="20" y="100" width="180" height="60" rx="8" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="110" y="126" fill="#2a2826" font-size="13" text-anchor="middle">2. Extension tools</text>
+      <text x="110" y="146" fill="#6b6863" font-size="11" text-anchor="middle">first-registered-wins</text>
+
+      <rect x="20" y="170" width="180" height="60" rx="8" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="110" y="196" fill="#2a2826" font-size="13" text-anchor="middle">3. SDK custom tools</text>
+      <text x="110" y="216" fill="#6b6863" font-size="11" text-anchor="middle">programmatic embedding</text>
+
+      <!-- Merge -->
+      <rect x="290" y="80" width="200" height="120" rx="10" fill="#fafaf7" stroke="#5a6f4e"/>
+      <text x="390" y="118" fill="#5a6f4e" font-size="14" text-anchor="middle" font-weight="600">_refreshToolRegistry()</text>
+      <text x="390" y="142" fill="#2a2826" font-size="12" text-anchor="middle">merge sources</text>
+      <text x="390" y="160" fill="#2a2826" font-size="12" text-anchor="middle">apply --tools filter</text>
+      <text x="390" y="178" fill="#2a2826" font-size="12" text-anchor="middle">collect prompt snippets</text>
+
+      <!-- Outputs -->
+      <rect x="580" y="20" width="200" height="60" rx="8" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="680" y="46" fill="#2a2826" font-size="13" text-anchor="middle">Dispatch table</text>
+      <text x="680" y="66" fill="#6b6863" font-size="11" text-anchor="middle">LLM tool calls land here</text>
+
+      <rect x="580" y="100" width="200" height="60" rx="8" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="680" y="126" fill="#2a2826" font-size="13" text-anchor="middle">System prompt</text>
+      <text x="680" y="146" fill="#6b6863" font-size="11" text-anchor="middle">promptSnippet · guidelines</text>
+
+      <rect x="580" y="180" width="200" height="60" rx="8" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="680" y="206" fill="#2a2826" font-size="13" text-anchor="middle">TUI renderers</text>
+      <text x="680" y="226" fill="#6b6863" font-size="11" text-anchor="middle">renderCall · renderResult</text>
+
+      <line x1="200" y1="60" x2="288" y2="120" stroke="#2a2826" stroke-width="1" marker-end="url(#arr3)"/>
+      <line x1="200" y1="130" x2="288" y2="140" stroke="#2a2826" stroke-width="1" marker-end="url(#arr3)"/>
+      <line x1="200" y1="200" x2="288" y2="160" stroke="#2a2826" stroke-width="1" marker-end="url(#arr3)"/>
+
+      <line x1="490" y1="120" x2="578" y2="50" stroke="#2a2826" stroke-width="1" marker-end="url(#arr3)"/>
+      <line x1="490" y1="140" x2="578" y2="130" stroke="#2a2826" stroke-width="1" marker-end="url(#arr3)"/>
+      <line x1="490" y1="160" x2="578" y2="210" stroke="#2a2826" stroke-width="1" marker-end="url(#arr3)"/>
+    </svg>
+  </div>
+
+  <div class="card">
+    <div class="label">Code · registering a tool</div>
+<pre>api.<span class="f">registerTool</span>({
+  name: <span class="s">"weather"</span>,
+  description: <span class="s">"Get current weather for a city."</span>,
+  promptSnippet: <span class="s">"weather: city → temp/conditions"</span>,
+  input: <span class="n">Type</span>.<span class="f">Object</span>({ city: <span class="n">Type</span>.<span class="f">String</span>() }),
+  <span class="k">async</span> <span class="f">execute</span>(input) {
+    <span class="k">return</span> <span class="k">await</span> <span class="f">fetchWeather</span>(input.city);
+  },
+  <span class="f">renderResult</span>(result) {
+    <span class="c">// Custom TUI rendering — Pi defers display to you</span>
+    <span class="k">return</span> [<span class="s">`☀ ${result.temp}°`</span>];
+  }
+});</pre>
+  </div>
+
+  <div class="callout">
+    <div class="ttl">Why this matters</div>
+    Extensions can <strong>replace</strong> built-in tools by registering with
+    the same name. The <code>setActiveTools()</code> API toggles tools at
+    runtime. <code>tool_call</code>/<code>tool_result</code> hooks are
+    installed <strong>once</strong> on the Agent and delegate via the current
+    runner — so <code>/reload</code> swaps the runner without re-wiring hooks.
+  </div>
+</section>
+
+<!-- ===================== RESOURCES ===================== -->
+<section id="resources">
+  <h2><span class="num">04</span>Resource discovery: file-based everything</h2>
+  <p class="sub">No registry, no UI config. Drop a file in the right place.</p>
+
+  <p>
+    Pi auto-discovers resources from <strong>global</strong> (<code>~/.pi/agent/</code>),
+    <strong>project</strong> (<code>.pi/</code>), <strong>package</strong>
+    (<code>package.json</code> <code>pi.*</code> fields), and <strong>CLI</strong>
+    sources. Project overrides global; CLI overrides both. Every loaded
+    resource carries <code>SourceInfo</code> provenance.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Resource</th><th>Global</th><th>Project</th><th>Package</th><th>CLI</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Extensions</td><td><code>~/.pi/agent/extensions/</code></td><td><code>.pi/extensions/</code></td><td><code>pi.extensions</code></td><td><code>-e</code></td></tr>
+      <tr><td>Skills</td><td><code>~/.pi/agent/skills/</code></td><td><code>.pi/skills/</code></td><td><code>pi.skills</code></td><td><code>--skill</code></td></tr>
+      <tr><td>Prompts</td><td><code>~/.pi/agent/prompts/</code></td><td><code>.pi/prompts/</code></td><td><code>pi.prompts</code></td><td><code>--prompt-template</code></td></tr>
+      <tr><td>Themes</td><td><code>~/.pi/agent/themes/</code></td><td><code>.pi/themes/</code></td><td><code>pi.themes</code></td><td><code>--theme</code></td></tr>
+      <tr><td>Context</td><td><code>AGENTS.md</code></td><td>walking up from cwd</td><td>—</td><td><code>--no-context-files</code></td></tr>
+      <tr><td>System prompt</td><td><code>SYSTEM.md</code></td><td><code>.pi/SYSTEM.md</code></td><td>—</td><td><code>--system-prompt</code></td></tr>
+      <tr><td>Settings</td><td><code>settings.json</code></td><td><code>.pi/settings.json</code></td><td>—</td><td>flags</td></tr>
+    </tbody>
+  </table>
+
+  <div class="twocol">
+    <div class="card tight">
+      <div class="label">Context walks up the tree</div>
+      <p style="margin:0;font-size:14px">
+        Pi collects every <code>AGENTS.md</code>/<code>CLAUDE.md</code> from cwd
+        up to the git root. A monorepo gets root-level conventions
+        <strong>and</strong> per-package overrides, layered automatically.
+      </p>
+    </div>
+    <div class="card tight">
+      <div class="label">Skills follow a public standard</div>
+      <p style="margin:0;font-size:14px">
+        Skills implement the <a href="https://agentskills.io" style="color:var(--blue);font-weight:600;border-bottom:1.5px solid var(--blue)">Agent Skills</a>
+        spec. Discovered, validated, rendered as XML in the prompt. Skills
+        with <code>disable-model-invocation: true</code> stay invisible to
+        the LLM but remain callable via <code>/skill:name</code>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SYSTEM PROMPT ===================== -->
+<section id="prompt">
+  <h2><span class="num">05</span>The system prompt is composed, not static</h2>
+  <p class="sub">Assembled at runtime from eight pluggable pieces.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 900 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="System prompt assembly">
+      <defs>
+        <marker id="arr4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#2a2826"/>
+        </marker>
+      </defs>
+
+      <g font-family="ui-monospace,Menlo" font-size="12">
+        <rect x="20" y="20" width="230" height="40" rx="6" fill="#fafaf7" stroke="#2a2826"/>
+        <text x="135" y="45" fill="#2a2826" text-anchor="middle">SYSTEM.md  <tspan fill="#6b6863">(or default)</tspan></text>
+
+        <rect x="20" y="70" width="230" height="40" rx="6" fill="#fafaf7" stroke="#2a2826"/>
+        <text x="135" y="95" fill="#2a2826" text-anchor="middle">APPEND_SYSTEM.md</text>
+
+        <rect x="20" y="120" width="230" height="40" rx="6" fill="#fafaf7" stroke="#2a2826"/>
+        <text x="135" y="145" fill="#2a2826" text-anchor="middle">tool promptSnippet[]</text>
+
+        <rect x="20" y="170" width="230" height="40" rx="6" fill="#fafaf7" stroke="#2a2826"/>
+        <text x="135" y="195" fill="#2a2826" text-anchor="middle">tool promptGuidelines[]</text>
+
+        <rect x="20" y="220" width="230" height="40" rx="6" fill="#fafaf7" stroke="#2a2826"/>
+        <text x="135" y="245" fill="#2a2826" text-anchor="middle">AGENTS.md (concatenated)</text>
+
+        <rect x="20" y="270" width="230" height="40" rx="6" fill="#fafaf7" stroke="#2a2826"/>
+        <text x="135" y="295" fill="#2a2826" text-anchor="middle">&lt;available_skills&gt; XML</text>
+
+        <rect x="20" y="320" width="230" height="40" rx="6" fill="#fafaf7" stroke="#2a2826"/>
+        <text x="135" y="345" fill="#2a2826" text-anchor="middle">pi docs pointers</text>
+      </g>
+
+      <!-- arrows merging -->
+      <g stroke="#2a2826" stroke-width="1" fill="none">
+        <line x1="250" y1="40" x2="430" y2="170" marker-end="url(#arr4)"/>
+        <line x1="250" y1="90" x2="430" y2="172" marker-end="url(#arr4)"/>
+        <line x1="250" y1="140" x2="430" y2="174" marker-end="url(#arr4)"/>
+        <line x1="250" y1="190" x2="430" y2="176" marker-end="url(#arr4)"/>
+        <line x1="250" y1="240" x2="430" y2="178" marker-end="url(#arr4)"/>
+        <line x1="250" y1="290" x2="430" y2="180" marker-end="url(#arr4)"/>
+        <line x1="250" y1="340" x2="430" y2="182" marker-end="url(#arr4)"/>
+      </g>
+
+      <!-- assembled -->
+      <rect x="440" y="140" width="200" height="80" rx="10" fill="#fafaf7" stroke="#5a6f4e"/>
+      <text x="540" y="170" fill="#5a6f4e" font-size="14" text-anchor="middle" font-weight="600">BuildSystemPrompt</text>
+      <text x="540" y="190" fill="#6b6863" font-size="11" text-anchor="middle">assembles structured pieces</text>
+      <text x="540" y="208" fill="#6b6863" font-size="11" text-anchor="middle">into a single string</text>
+
+      <line x1="640" y1="180" x2="700" y2="180" stroke="#2a2826" stroke-width="1" marker-end="url(#arr4)"/>
+
+      <!-- extension rewrite -->
+      <rect x="700" y="100" width="180" height="80" rx="10" fill="#fafaf7" stroke="#5a6f4e"/>
+      <text x="790" y="130" fill="#5a6f4e" font-size="13" text-anchor="middle" font-family="ui-monospace,Menlo">before_agent_start</text>
+      <text x="790" y="150" fill="#6b6863" font-size="11" text-anchor="middle">inspects systemPromptOptions</text>
+      <text x="790" y="166" fill="#6b6863" font-size="11" text-anchor="middle">returns new systemPrompt</text>
+
+      <rect x="700" y="200" width="180" height="60" rx="10" fill="#fafaf7" stroke="#2a2826"/>
+      <text x="790" y="226" fill="#2a2826" font-size="13" text-anchor="middle">final prompt → LLM</text>
+      <text x="790" y="246" fill="#6b6863" font-size="11" text-anchor="middle">sent to provider</text>
+
+      <line x1="790" y1="180" x2="790" y2="198" stroke="#2a2826" stroke-width="1" marker-end="url(#arr4)"/>
+    </svg>
+  </div>
+
+  <p>
+    The <code>BuildSystemPromptOptions</code> struct holds all structured
+    inputs. Extensions receive it in
+    <code>before_agent_start.event.systemPromptOptions</code> so they can
+    inspect what Pi loaded without re-parsing — and then return a new
+    <code>systemPrompt</code> for that turn.
+  </p>
+</section>
+
+<!-- ===================== SESSIONS ===================== -->
+<section id="sessions">
+  <h2><span class="num">06</span>Sessions are a tree, not a log</h2>
+  <p class="sub">Branching and forking enable safe self-modification.</p>
+
+  <p>
+    Sessions are JSONL files where each entry has <code>id</code> and
+    <code>parentId</code>. This isn't cosmetic — it's the safety mechanism for
+    self-modification.
+  </p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 800 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Session tree">
+      <g font-family="ui-monospace,Menlo" font-size="11">
+        <circle cx="80" cy="120" r="20" fill="#fafaf7" stroke="#5a6f4e" stroke-width="1"/>
+        <text x="80" y="124" fill="#5a6f4e" text-anchor="middle">A</text>
+
+        <circle cx="180" cy="120" r="20" fill="#fafaf7" stroke="#5a6f4e" stroke-width="1"/>
+        <text x="180" y="124" fill="#5a6f4e" text-anchor="middle">B</text>
+
+        <circle cx="280" cy="120" r="20" fill="#fafaf7" stroke="#5a6f4e" stroke-width="1"/>
+        <text x="280" y="124" fill="#5a6f4e" text-anchor="middle">C</text>
+
+        <!-- main branch -->
+        <circle cx="380" cy="80" r="20" fill="#fafaf7" stroke="#2a2826" stroke-width="1"/>
+        <text x="380" y="84" fill="#2a2826" text-anchor="middle">D</text>
+        <circle cx="480" cy="80" r="20" fill="#fafaf7" stroke="#2a2826" stroke-width="1"/>
+        <text x="480" y="84" fill="#2a2826" text-anchor="middle">E</text>
+        <circle cx="580" cy="80" r="20" fill="#fafaf7" stroke="#2a2826" stroke-width="1"/>
+        <text x="580" y="84" fill="#2a2826" text-anchor="middle">F</text>
+
+        <!-- forked branch -->
+        <circle cx="380" cy="180" r="20" fill="#fafaf7" stroke="#2a2826" stroke-width="1"/>
+        <text x="380" y="184" fill="#2a2826" text-anchor="middle">D'</text>
+        <circle cx="480" cy="180" r="20" fill="#fafaf7" stroke="#2a2826" stroke-width="1"/>
+        <text x="480" y="184" fill="#2a2826" text-anchor="middle">E'</text>
+
+        <!-- main branch lines -->
+        <line x1="100" y1="120" x2="160" y2="120" stroke="#5a6f4e" stroke-width="1"/>
+        <line x1="200" y1="120" x2="260" y2="120" stroke="#5a6f4e" stroke-width="1"/>
+        <line x1="300" y1="115" x2="365" y2="90" stroke="#2a2826" stroke-width="1"/>
+        <line x1="400" y1="80" x2="460" y2="80" stroke="#2a2826" stroke-width="1"/>
+        <line x1="500" y1="80" x2="560" y2="80" stroke="#2a2826" stroke-width="1"/>
+
+        <!-- fork lines -->
+        <line x1="300" y1="125" x2="365" y2="170" stroke="#2a2826" stroke-width="1"/>
+        <line x1="400" y1="180" x2="460" y2="180" stroke="#2a2826" stroke-width="1"/>
+
+        <text x="40" y="124" fill="#6b6863" text-anchor="end">start →</text>
+        <text x="620" y="84" fill="#2a2826">/tree (current)</text>
+        <text x="520" y="184" fill="#2a2826">/fork (preserved)</text>
+
+        <text x="280" y="220" fill="#6b6863" font-size="11" text-anchor="middle">fork point: any entry. original branch stays alive in same JSONL file.</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="twocol">
+    <div class="card tight">
+      <div class="label"><code>/fork</code> — new file</div>
+      <p style="margin:0;font-size:14px">
+        Creates a new session file from any point. Original preserved on disk.
+      </p>
+    </div>
+    <div class="card tight">
+      <div class="label"><code>/tree</code> — same file</div>
+      <p style="margin:0;font-size:14px">
+        Branch in place. Abandoned branches get auto-summarized so context survives.
+      </p>
+    </div>
+    <div class="card tight">
+      <div class="label">Compaction is additive</div>
+      <p style="margin:0;font-size:14px">
+        Old messages are summarized into a <code>CompactionEntry</code> — but never deleted from the JSONL.
+      </p>
+    </div>
+    <div class="card tight">
+      <div class="label">Extension state lives here too</div>
+      <p style="margin:0;font-size:14px">
+        <code>pi.appendEntry("my-type", data)</code> writes custom entries that aren't sent to the LLM. Restore on <code>session_start</code>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TUI ===================== -->
+<section id="tui">
+  <h2><span class="num">07</span>The TUI is a component tree, not a fixed UI</h2>
+  <p class="sub">Extensions can replace the editor, footer, header, or whole panels.</p>
+
+  <p>
+    All components implement a simple interface: <code>render(width)</code>
+    returns <code>string[]</code>, optional <code>handleInput(data)</code>,
+    optional <code>Focusable</code> for cursor positioning. Components compose
+    via <code>Container.addChild()</code>. Themes hot-reload via component
+    <code>invalidate()</code>.
+  </p>
+
+  <table>
+    <thead><tr><th>API</th><th>What it replaces</th></tr></thead>
+    <tbody>
+      <tr><td><code>ctx.ui.setEditorComponent(factory)</code></td><td>The text editor (e.g. vim mode)</td></tr>
+      <tr><td><code>ctx.ui.setFooter(factory)</code></td><td>The footer bar</td></tr>
+      <tr><td><code>ctx.ui.setHeader(factory)</code></td><td>The startup header</td></tr>
+      <tr><td><code>ctx.ui.setWidget(key, content)</code></td><td>Adds widgets above/below the editor</td></tr>
+      <tr><td><code>ctx.ui.custom(factory)</code></td><td>Modal overlay (editor, selector, confirm)</td></tr>
+      <tr><td><code>ctx.ui.addAutocompleteProvider(factory)</code></td><td>Stacked autocomplete behavior</td></tr>
+      <tr><td><code>pi.registerMessageRenderer(type, fn)</code></td><td>Custom message-type rendering</td></tr>
+      <tr><td><code>pi.registerShortcut(key, handler)</code></td><td>Keyboard shortcuts</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===================== SELF-MODIFICATION ===================== -->
+<section id="self">
+  <h2><span class="num">08</span>The self-modification loop</h2>
+  <p class="sub">Pi can extend itself because everything is a file its own tools can edit.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 820 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Self-modification loop">
+      <defs>
+        <marker id="arr5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#5a6f4e"/>
+        </marker>
+      </defs>
+
+      <g >
+        <rect x="20" y="40" width="180" height="60" rx="10" fill="#fafaf7" stroke="#5a6f4e"/>
+        <text x="110" y="70" fill="#5a6f4e" font-size="14" text-anchor="middle">User asks Pi</text>
+        <text x="110" y="88" fill="#6b6863" font-size="11" text-anchor="middle">"add a feature"</text>
+
+        <rect x="240" y="40" width="180" height="60" rx="10" fill="#fafaf7" stroke="#5a6f4e"/>
+        <text x="330" y="62" fill="#5a6f4e" font-size="14" text-anchor="middle">Pi reads docs</text>
+        <text x="330" y="80" fill="#6b6863" font-size="11" text-anchor="middle">via read tool</text>
+        <text x="330" y="93" fill="#6b6863" font-size="11" text-anchor="middle">+ existing extensions</text>
+
+        <rect x="460" y="40" width="180" height="60" rx="10" fill="#fafaf7" stroke="#5a6f4e"/>
+        <text x="550" y="62" fill="#5a6f4e" font-size="14" text-anchor="middle">Pi writes file</text>
+        <text x="550" y="80" fill="#6b6863" font-size="11" text-anchor="middle">via write tool to</text>
+        <text x="550" y="93" fill="#6b6863" font-size="11" text-anchor="middle">~/.pi/agent/extensions/</text>
+
+        <rect x="680" y="40" width="120" height="60" rx="10" fill="#fafaf7" stroke="#5a6f4e"/>
+        <text x="740" y="62" fill="#5a6f4e" font-size="14" text-anchor="middle">/reload</text>
+        <text x="740" y="80" fill="#6b6863" font-size="11" text-anchor="middle">hot-rebind</text>
+        <text x="740" y="93" fill="#6b6863" font-size="11" text-anchor="middle">no restart</text>
+
+        <rect x="240" y="200" width="360" height="80" rx="10" fill="#fafaf7" stroke="#5a6f4e"/>
+        <text x="420" y="230" fill="#5a6f4e" font-size="14" text-anchor="middle" font-weight="600">New behavior is live</text>
+        <text x="420" y="252" fill="#6b6863" font-size="12" text-anchor="middle">Tool/skill/prompt/theme available in current session.</text>
+        <text x="420" y="270" fill="#6b6863" font-size="12" text-anchor="middle">Session preserved. Try it, iterate, or `/fork` to test safely.</text>
+
+        <line x1="200" y1="70" x2="238" y2="70" stroke="#5a6f4e" stroke-width="1" marker-end="url(#arr5)"/>
+        <line x1="420" y1="70" x2="458" y2="70" stroke="#5a6f4e" stroke-width="1" marker-end="url(#arr5)"/>
+        <line x1="640" y1="70" x2="678" y2="70" stroke="#5a6f4e" stroke-width="1" marker-end="url(#arr5)"/>
+        <line x1="740" y1="100" x2="500" y2="198" stroke="#5a6f4e" stroke-width="1" marker-end="url(#arr5)"/>
+        <line x1="240" y1="240" x2="60" y2="240" stroke="#5a6f4e" stroke-width="1" stroke-dasharray="4 4"/>
+        <line x1="60" y1="240" x2="60" y2="100" stroke="#5a6f4e" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arr5)"/>
+        <text x="80" y="160" fill="#6b6863" font-size="11">iterate</text>
+      </g>
+    </svg>
+  </div>
+
+  <h3>Why this actually works</h3>
+  <ol>
+    <li><strong>Extensions are <code>.ts</code> files</strong> loaded via <a href="https://github.com/unjs/jiti" style="color:var(--blue);font-weight:600;border-bottom:1.5px solid var(--blue)">jiti</a> — no compile step, full Node API.</li>
+    <li><strong>Skills are Markdown</strong>. Drop a <code>SKILL.md</code> in <code>~/.pi/agent/skills/</code> and it's instantly available.</li>
+    <li><strong>Prompts, themes, settings</strong> — all files. The agent's own <code>read</code>/<code>write</code>/<code>edit</code> tools manipulate them.</li>
+    <li><strong><code>/reload</code></strong> re-runs resource discovery, reloads extensions, rebinds the runner. Session preserved.</li>
+    <li><strong><code>pi.registerProvider()</code></strong> lets extensions add LLM providers (custom models, OAuth, streaming) at runtime.</li>
+    <li><strong><code>pi.sendUserMessage()</code></strong> + delivery timing (<code>"steer"</code>, <code>"followUp"</code>, <code>"nextTurn"</code>) lets extensions orchestrate multi-step workflows.</li>
+    <li><strong>Session-replacement APIs</strong> (<code>ctx.newSession()</code>, <code>ctx.fork()</code>, <code>ctx.switchSession()</code>) with <code>assertActive()</code> guards prevent stale-object bugs.</li>
+  </ol>
+
+  <div class="callout">
+    <div class="ttl">The net effect</div>
+    Pi is a <strong>framework for building coding agents</strong>, not a
+    coding agent with a plugin API. The author moved every behavioral decision
+    out of the core and into extension points — and because those extension
+    points are just files the agent's own tools can touch, Pi can meaningfully
+    participate in extending itself.
+  </div>
+</section>
+
+<!-- ===================== STALE-OBJECT GUARDS ===================== -->
+<section id="stale">
+  <h2><span class="num">09</span>The hard part: stale references after reload</h2>
+  <p class="sub">Self-modification introduces a class of bugs that don't exist in static systems.</p>
+
+  <p>
+    Hot reload is the feature that makes self-modification useful. It's also
+    the feature that introduces the subtlest bug class in the whole system.
+    Pi solves it with two related patterns — <strong>runner indirection</strong>
+    and <strong>explicit invalidation</strong> — that are worth stealing.
+  </p>
+
+  <h3>The bug class: time-of-check vs. time-of-use</h3>
+  <p>
+    Imagine extension A captures a <code>ctx</code> object in a closure (say, a
+    command handler). The user runs <code>/reload</code>, which swaps the
+    extension runner. Now the closure fires and dereferences <code>ctx</code> —
+    but the runner that object pointed to is gone. Without guards, you get
+    silently wrong behavior: messages sent to a dead session, providers
+    registered against a vanished registry, tool calls vanishing into the void.
+  </p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 880 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Stale reference problem">
+      <defs>
+        <marker id="arrS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#2a2826"/>
+        </marker>
+        <marker id="arrR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#5a6f4e"/>
+        </marker>
+      </defs>
+      <g >
+        <!-- Step 1 -->
+        <text x="20" y="28" fill="#6b6863" font-size="11" font-family="ui-monospace,Menlo">T₀ extension registers command</text>
+        <rect x="20" y="40" width="180" height="56" rx="8" fill="#fafaf7" stroke="#2a2826"/>
+        <text x="110" y="62" fill="#2a2826" font-size="12" text-anchor="middle">closure captures ctx</text>
+        <text x="110" y="80" fill="#6b6863" font-size="11" text-anchor="middle">→ runner v1</text>
+
+        <line x1="200" y1="68" x2="240" y2="68" stroke="#2a2826" stroke-width="1" marker-end="url(#arrS)"/>
+
+        <!-- Step 2 -->
+        <text x="244" y="28" fill="#6b6863" font-size="11" font-family="ui-monospace,Menlo">T₁ user runs /reload</text>
+        <rect x="244" y="40" width="200" height="56" rx="8" fill="#fafaf7" stroke="#5a6f4e"/>
+        <text x="344" y="62" fill="#5a6f4e" font-size="12" text-anchor="middle">runner v1 invalidated</text>
+        <text x="344" y="80" fill="#6b6863" font-size="11" text-anchor="middle">runner v2 takes over</text>
+
+        <line x1="444" y1="68" x2="484" y2="68" stroke="#2a2826" stroke-width="1" marker-end="url(#arrS)"/>
+
+        <!-- Step 3 -->
+        <text x="488" y="28" fill="#6b6863" font-size="11" font-family="ui-monospace,Menlo">T₂ closure fires</text>
+        <rect x="488" y="40" width="200" height="56" rx="8" fill="#fafaf7" stroke="#5a6f4e"/>
+        <text x="588" y="62" fill="#2a2826" font-size="12" text-anchor="middle">ctx.sendUserMessage(...)</text>
+        <text x="588" y="80" fill="#5a6f4e" font-size="11" text-anchor="middle">stale → ???</text>
+
+        <line x1="688" y1="68" x2="724" y2="68" stroke="#5a6f4e" stroke-width="1" marker-end="url(#arrR)"/>
+
+        <!-- Guard -->
+        <rect x="728" y="40" width="140" height="56" rx="8" fill="#fafaf7" stroke="#2a2826"/>
+        <text x="798" y="62" fill="#2a2826" font-size="12" text-anchor="middle" font-family="ui-monospace,Menlo">assertActive()</text>
+        <text x="798" y="80" fill="#6b6863" font-size="11" text-anchor="middle">throws clear error</text>
+
+        <!-- Resolution -->
+        <rect x="120" y="150" width="640" height="70" rx="10" fill="#fafaf7" stroke="#5a6f4e"/>
+        <text x="440" y="178" fill="#5a6f4e" font-size="13" text-anchor="middle" font-weight="600">Resolution: withSession(ctx, async (fresh) => { /* use fresh, not captured */ })</text>
+        <text x="440" y="198" fill="#6b6863" font-size="11" text-anchor="middle">Pi re-binds the API per-callback so post-replacement code uses the live runner.</text>
+      </g>
+    </svg>
+  </div>
+
+  <h3>The two patterns</h3>
+  <div class="twocol">
+    <div class="card tight">
+      <div class="label">Pattern 1 · runner indirection</div>
+      <p style="margin:0;font-size:14px">
+        The tool hooks (<code>beforeToolCall</code>, <code>afterToolCall</code>) are
+        installed <strong>once</strong> on the Agent. They read
+        <code>this._extensionRunner</code> at call time. So <code>/reload</code>
+        swaps the runner pointer; the hooks themselves never need rewiring.
+      </p>
+    </div>
+    <div class="card tight">
+      <div class="label">Pattern 2 · explicit invalidation</div>
+      <p style="margin:0;font-size:14px">
+        Each extension instance carries an <code>ExtensionRuntimeState</code>.
+        On teardown, <code>invalidate(reason)</code> is called. Any subsequent
+        <code>ctx.assertActive()</code> throws a developer-facing message
+        explaining what to do instead.
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label">Code · the error message that teaches</div>
+<pre><span class="c">// Pi's actual invalidation message — the message itself is the docs:</span>
+<span class="s">"Do not use a captured pi or command ctx after ctx.newSession(),
+ ctx.fork(), ctx.switchSession(), or ctx.reload(). For newSession,
+ fork, and switchSession, move post-replacement work into withSession.
+ For reload, do not use the old ctx after await ctx.reload()."</span></pre>
+  </div>
+
+  <div class="callout">
+    <div class="ttl">Why this matters</div>
+    Static systems can't have this bug. Self-modifying systems get it for
+    free. If you build one, you need both: a <strong>stable indirection</strong>
+    (so external callers don't shatter when internals swap) and an
+    <strong>explicit fail-fast</strong> (so internal callers can't silently
+    operate on dead state).
+  </div>
+</section>
+
+<!-- ===================== WEB-UI SPLIT ===================== -->
+<section id="webui">
+  <h2><span class="num">10</span>The web-ui split: same core, different extensibility model</h2>
+  <p class="sub">Not every consumer should get the full extension API. Pi's solution is interesting.</p>
+
+  <p>
+    Pi recently grew a <code>packages/web-ui</code> sibling to the CLI. It
+    reuses the same <code>pi-ai</code> and <code>pi-agent-core</code> packages
+    that power the terminal agent, but exposes a <strong>different
+    extensibility surface</strong> — and that's the lesson worth studying.
+  </p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 880 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CLI vs web-ui extensibility split">
+      <defs>
+        <marker id="arrW" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#2a2826"/>
+        </marker>
+      </defs>
+      <g >
+        <!-- Core -->
+        <rect x="340" y="20" width="200" height="64" rx="10" fill="#fafaf7" stroke="#5a6f4e"/>
+        <text x="440" y="46" fill="#5a6f4e" font-size="14" text-anchor="middle" font-weight="600">pi-agent-core / pi-ai</text>
+        <text x="440" y="66" fill="#6b6863" font-size="11" text-anchor="middle">turns, tools, sessions, providers</text>
+
+        <!-- CLI lane -->
+        <rect x="40" y="140" width="340" height="120" rx="10" fill="#fafaf7" stroke="#5a6f4e"/>
+        <text x="210" y="166" fill="#5a6f4e" font-size="14" text-anchor="middle" font-weight="600">CLI (coding-agent)</text>
+        <text x="210" y="188" fill="#2a2826" font-size="12" text-anchor="middle">+ full ExtensionAPI</text>
+        <text x="210" y="206" fill="#6b6863" font-size="11" text-anchor="middle">29 events · tool registry · TUI surfaces</text>
+        <text x="210" y="222" fill="#6b6863" font-size="11" text-anchor="middle">resource discovery · /reload</text>
+        <text x="210" y="244" fill="#6b6863" font-size="11" text-anchor="middle" font-style="italic">consumer: humans + the agent itself</text>
+
+        <!-- Web lane -->
+        <rect x="500" y="140" width="340" height="120" rx="10" fill="#fafaf7" stroke="#2a2826"/>
+        <text x="670" y="166" fill="#2a2826" font-size="14" text-anchor="middle" font-weight="600">web-ui (component lib)</text>
+        <text x="670" y="188" fill="#2a2826" font-size="12" text-anchor="middle">+ ChatPanel, renderers, storage</text>
+        <text x="670" y="206" fill="#6b6863" font-size="11" text-anchor="middle">no event hooks · no tool registry</text>
+        <text x="670" y="222" fill="#6b6863" font-size="11" text-anchor="middle">embed via props · custom artifacts</text>
+        <text x="670" y="244" fill="#6b6863" font-size="11" text-anchor="middle" font-style="italic">consumer: web app developers</text>
+
+        <!-- Lines -->
+        <line x1="400" y1="84" x2="240" y2="138" stroke="#2a2826" stroke-width="1" marker-end="url(#arrW)"/>
+        <line x1="480" y1="84" x2="640" y2="138" stroke="#2a2826" stroke-width="1" marker-end="url(#arrW)"/>
+      </g>
+    </svg>
+  </div>
+
+  <h3>Two extensibility models, one engine</h3>
+  <table>
+    <thead><tr><th></th><th>CLI</th><th>web-ui</th></tr></thead>
+    <tbody>
+      <tr><td>Trust model</td><td>Local files, full Node access</td><td>Browser sandbox, hosted apps</td></tr>
+      <tr><td>Extension API</td><td>Full <code>ExtensionAPI</code> (29 events, hot reload)</td><td>Props, slot components, artifact renderers</td></tr>
+      <tr><td>Who extends</td><td>The user — and the agent itself</td><td>Application developers embedding chat</td></tr>
+      <tr><td>Surface size</td><td>Wide (the agent is the author)</td><td>Narrow (predictable for product builders)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <div class="ttl">The design insight</div>
+    A self-modifying agent doesn't want to ship its full reflection API to
+    every embedder. The CLI gets the reflective surface — because that's where
+    the agent runs as a peer of the user. The web-ui gets a tight component
+    contract — because that's where third parties want stability. Same engine
+    underneath; different extension shapes per audience.
+  </div>
+</section>
+
+<!-- ===================== LESSONS ===================== -->
+<section id="lessons">
+  <h2><span class="num">11</span>Lessons for building self-modifying software</h2>
+  <p class="sub">Generalizable principles, pulled out of Pi's specific implementation.</p>
+
+  <p>
+    If you take Pi apart, the load-bearing decisions aren't really about agents
+    or LLMs. They're patterns for any system that needs to safely modify
+    itself at runtime. Here's what to steal.
+  </p>
+
+  <h3>1 · Pick a substrate the system can already read and write</h3>
+  <p>
+    Pi extensions are <code>.ts</code> files. Skills are <code>.md</code>.
+    Themes are <code>.json</code>. The agent has <code>read</code>,
+    <code>write</code>, and <code>edit</code> tools. That's not a coincidence —
+    it's the whole game. A self-modifying system needs its modification
+    surface to be the same thing it operates on. If your config lives in a
+    database with a custom admin UI, your agent can't change it without first
+    being taught what the admin UI is.
+  </p>
+  <p>
+    <strong>Generalization:</strong> if you want X to be self-modifiable, X
+    has to live in the medium the modifier already understands. Files for
+    code agents. SQL rows for SQL-speaking agents. HTTP endpoints for browser
+    agents. Match the substrate to the actor.
+  </p>
+
+  <h3>2 · Pipelines beat buses when behavior must compose</h3>
+  <p>
+    Pi's 29 events are <strong>middleware</strong>, not pub/sub. Each handler
+    receives a payload, can mutate or replace it, and returns it to the next
+    handler. Pub/sub gives you observation but not composition — three plugins
+    listening to <code>tool_call</code> can't all rewrite the args, because
+    there's no defined merge.
+  </p>
+  <p>
+    <strong>Generalization:</strong> if extensions need to <em>collaborate</em>
+    on a decision (block, transform, augment), use a pipeline with structured
+    return values and a defined order. If they just need to <em>observe</em>
+    (log, metric, audit), pub/sub is fine. Most interesting extensibility
+    points are the first kind.
+  </p>
+
+  <h3>3 · Stable indirection + explicit invalidation = safe swaps</h3>
+  <p>
+    Pi installs hooks on the Agent <strong>once</strong>. Those hooks
+    dereference <code>this._extensionRunner</code> at call time. So
+    <code>/reload</code> swaps the runner pointer; nothing else changes. This
+    is the "stable indirection" half. The other half is
+    <code>assertActive()</code> — old objects fail loudly the moment anyone
+    tries to use them after invalidation.
+  </p>
+  <p>
+    <strong>Generalization:</strong> any system with hot-swappable internals
+    needs a <strong>stable seam</strong> (a pointer the outside world holds,
+    that internally redirects to the current implementation) and a
+    <strong>fail-fast contract</strong> (so captured references can't silently
+    operate on dead state). The bug class you're avoiding is silent
+    misbehavior; the cure is loud crashes at the boundary.
+  </p>
+
+  <h3>4 · Make rollback first-class via tree history</h3>
+  <p>
+    Pi sessions are <code>id</code>/<code>parentId</code> trees, not linear
+    logs. The agent can fork before a risky modification, try it, and
+    navigate back if it goes wrong. Compaction is additive — old messages get
+    summarized, but never deleted.
+  </p>
+  <p>
+    <strong>Generalization:</strong> any system that modifies itself must have
+    a "back" button at the granularity of the modification. Git models this
+    for code. Pi models it for conversational state. Without it,
+    self-modification is one-way and therefore unsafe.
+  </p>
+
+  <h3>5 · Track provenance from day one</h3>
+  <p>
+    Pi tags every resource with <code>SourceInfo</code> —
+    <code>source</code> (builtin/local/npm/git/cli/sdk),
+    <code>scope</code> (user/project/temporary), and
+    <code>baseDir</code>. When the agent generates an extension, it can later
+    inspect what it created vs. what was already there. Provenance is what
+    lets a self-modifying system audit itself.
+  </p>
+  <p>
+    <strong>Generalization:</strong> if your system can be modified by
+    multiple actors (humans, agents, packages, CLI flags), every artifact
+    needs a "who/where/when" tag. Without it, the agent can't reason about
+    what's safe to change.
+  </p>
+
+  <h3>6 · Defer every decision the core doesn't have to make</h3>
+  <p>
+    Pi's core has no subagents, no plan mode, no permission UI, no MCP, no
+    background bash, no todos. All of those are extensions. The core provides
+    the seam; extensions provide the policy. This isn't minimalism for its
+    own sake — it's that <strong>every decision baked into the core is one
+    the agent can't change about itself</strong>.
+  </p>
+  <p>
+    <strong>Generalization:</strong> for any feature, ask "must this be in
+    the core, or can it be expressed in terms of core primitives?" If it can
+    be expressed via the extension API, ship it as an extension — even if
+    you write the extension yourself. That way users (and the agent) can
+    replace it without forking.
+  </p>
+
+  <h3>7 · Match the extension surface to the trust boundary</h3>
+  <p>
+    The CLI gets the full reflective API because it runs locally with full
+    Node access — the user (and the agent) already have the keys. The
+    <code>web-ui</code> package, which runs in browsers and gets embedded
+    into hosted apps, exposes only props and component slots. Same engine,
+    deliberately different surface.
+  </p>
+  <p>
+    <strong>Generalization:</strong> a self-modifying system probably needs
+    <em>two</em> extension APIs — a wide one for the trusted edge (where the
+    actor is a peer of the maintainer) and a narrow one for the untrusted
+    edge (where third parties build on top). Don't ship the reflective
+    surface to the untrusted side.
+  </p>
+
+  <h3>8 · Progressive disclosure for AI consumers</h3>
+  <p>
+    Pi puts <strong>short descriptions</strong> of skills in the system
+    prompt; the LLM reads the full skill on demand via <code>read</code>.
+    Tool snippets are one-liners. The LLM never sees the full tool schema
+    upfront — just enough to know what exists and when to call it.
+  </p>
+  <p>
+    <strong>Generalization:</strong> when an LLM is one of your extension
+    consumers, treat its context window as the constraint. Index everything
+    with one-line summaries; let the model pull detail on demand. This is the
+    same shape as a good README — purpose at the top, depth on click.
+  </p>
+
+  <div class="callout">
+    <div class="ttl">The meta-pattern</div>
+    Self-modifying software isn't a single technique. It's the
+    <strong>composition</strong> of seven smaller decisions, each individually
+    defensible: file-based substrate, pipeline middleware, stable indirection,
+    tree history, provenance, deferred decisions, audience-shaped surface.
+    Drop any one and the others stop being safe.
+  </div>
+</section>
+
+<footer>
+  <p>
+    Reading this once should give you the mental model. To go deeper: start
+    with <code>extensibility.md</code>, then read an existing extension in
+    <code>~/.pi/agent/extensions/</code> alongside the <code>ExtensionAPI</code>
+    type definitions.
+  </p>
+</footer>
+
+</div>
+</body>
+</html>
