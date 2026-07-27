@@ -1,5 +1,7 @@
 +++
 title = "A more humanist approach towards AI"
+path = "humanist-approach-towards-ai"
+aliases = ["posts/humanist-approach-towards-ai"]
 date = 2025-08-20
 draft = false
 [extra]

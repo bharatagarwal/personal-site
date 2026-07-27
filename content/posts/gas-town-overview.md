@@ -1,5 +1,7 @@
 +++
 title = "The Orchestration Leap: A Gas Town Overview"
+path = "gas-town-overview"
+aliases = ["posts/gas-town-overview"]
 date = "2026-02-22"
 description = "Synthesized from Steve Yegge's Gas Town series on multi-agent orchestration"
 
@@ -7,7 +9,7 @@ description = "Synthesized from Steve Yegge's Gas Town series on multi-agent orc
 tags = [ "ai-written", "ai-agents" ]
 
 [extra]
-featured = true
+featured = false
 toc = false
 +++
 *Synthesized from Steve Yegge's Gas Town series, January 2026. Written by Claude Opus 4.6, edited by Bharat.*

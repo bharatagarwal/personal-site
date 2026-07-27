@@ -29,7 +29,7 @@
       {% for post in posts %}
       <a class="post instant {% if post.extra.featured %}featured{% endif %}" href="{{ post.permalink }}">
         <span>{{ post.title }}</span>
-        <span class="date">{{ post.date | date(format=section.extra.date_format) }}</span>
+        <span class="date">{% if post.extra.original_date %}{{ post.extra.original_date }}{% else %}{{ post.date | date(format=section.extra.date_format) }}{% endif %}</span>
       </a>
       {% endfor %}
     </div>
@@ -39,7 +39,7 @@
       {% for post in section.pages %}
       <a class="post instant {% if post.extra.featured %}featured{% endif %}" href="{{ post.permalink }}">
         <span>{{ post.title }}</span>
-        <span class="date">{{ post.date | date(format=section.extra.date_format) }}</span>
+        <span class="date">{% if post.extra.original_date %}{{ post.extra.original_date }}{% else %}{{ post.date | date(format=section.extra.date_format) }}{% endif %}</span>
       </a>
       {% endfor %}
     </div>

@@ -1,5 +1,7 @@
 +++
 title = "Passive versus active voice in programming"
+path = "active-passive"
+aliases = ["posts/active-passive"]
 date = "2021-02-24"
 
 [taxonomies]
@@ -8,6 +10,8 @@ tags = []
 [extra]
 featured = false
 toc = false
+original_title = "Active v/s passive voice"
+original_url = "https://bharatagarwal.medium.com/active-v-s-passive-voice-8df75eda5f3a"
 +++
 
 I’ve been at my job approximately 10 months now. A lot of the time, I’ve spent reading documentation. I decided recently to start making notes on the computer. This is in contrast from before, where I would go slower and write notes on my notebook by hand.

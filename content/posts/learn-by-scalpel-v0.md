@@ -1,5 +1,7 @@
 +++
 title = "Learn by Scalpel"
+path = "learn-by-scalpel"
+aliases = ["posts/learn-by-scalpel"]
 slug = "learn-by-scalpel"
 date = "2026-03-01"
 description = "A method for learning hard things by editing, not writing."
@@ -8,7 +10,7 @@ description = "A method for learning hard things by editing, not writing."
 tags = ["ai", "learning", "raw-synthesis"]
 
 [extra]
-featured = true
+featured = false
 toc = false
 stage = 0
 +++

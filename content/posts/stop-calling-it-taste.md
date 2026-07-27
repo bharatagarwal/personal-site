@@ -1,5 +1,7 @@
 +++
 title = "Call It Judgement"
+path = "stop-calling-it-taste"
+aliases = ["posts/stop-calling-it-taste"]
 date = "2026-02-26"
 draft = true
 description = "The AI discourse keeps reaching for 'taste' as the human differentiator. Bourdieu would recognise the move. What people actually mean is judgement — and judgement is earned, not innate."

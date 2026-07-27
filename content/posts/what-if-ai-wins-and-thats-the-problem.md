@@ -1,5 +1,7 @@
 +++
 title = "What If AI Wins and That's the Problem?"
+path = "what-if-ai-wins-and-thats-the-problem"
+aliases = ["posts/what-if-ai-wins-and-thats-the-problem"]
 date = "2026-02-25"
 description = "A technical retelling of the 2028 Global Intelligence Crisis scenario — translated from finance-speak into engineering analogies and grounded in current agentic AI capabilities."
 
@@ -152,4 +154,3 @@ The scenario is a thought exercise. Here's where its load-bearing assumptions ar
 The value of this scenario is not in its specific predictions but in making a causal chain explicit. If AI capability continues to accelerate (plausible), and if that acceleration displaces white-collar labor faster than the economy adapts (uncertain), then the financial system — built on assumptions about stable human employment — faces a structural repricing.
 
 For engineers, Links 1-3 are what matter most. The capability trajectory is real. The build-vs-buy shift is already underway. The question of when augmentation becomes substitution is not academic — it's the variable that determines whether Links 4-6 ever fire.
-

@@ -1,0 +1,6 @@
+{% extends "serene/templates/post.html" %}
+
+{% block lang -%}
+{%- set section = get_section(path="projects/_index.md", metadata_only=true) -%}
+{%- if page.extra.lang %}{{ page.extra.lang }}{% elif section.extra.lang %}{{ section.extra.lang }}{% else %}{{ page.lang }}{% endif -%}
+{%- endblock lang %}

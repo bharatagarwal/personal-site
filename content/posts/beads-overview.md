@@ -1,5 +1,7 @@
 +++
 title = "The Agent Memory Problem: A Beads Overview"
+path = "beads-overview"
+aliases = ["posts/beads-overview"]
 date = "2026-02-21"
 description = "Synthesized from Steve Yegge's Beads series on agent memory and issue-driven workflows"
 
@@ -7,7 +9,7 @@ description = "Synthesized from Steve Yegge's Beads series on agent memory and i
 tags = [ "ai-written", "ai-agents" ]
 
 [extra]
-featured = true
+featured = false
 toc = false
 +++
 *Synthesized from Steve Yegge's Beads series, October–November 2025. Written by Claude Opus 4.6, edited by Bharat.*

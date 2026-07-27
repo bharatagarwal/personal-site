@@ -1,17 +1,21 @@
 +++
 title = "April 2017: a status check"
+path = "2017-status-check"
+aliases = ["posts/2017-status-check"]
 date = 2017-04-01
 draft = false
 [extra]
 featured = false
 toc = false
+original_title = "New Beginnings v378"
+original_url = "https://medium.com/@bharatagarwal/new-beginnings-v378-a1-48ea45193395"
 +++
 
 ### Goals and ambitions for April 2017 and beyond
 
 I’m a sucker for new beginnings. It’s the time when I have my brainstorm face on — furrowed eyebrows, wrinkled forehead, scratching beard (if present), munching on junk food, and making lists. Lists, they’re antithetical for getting the task done. You feel sastisfied at making the list, and never get down to doing it.
 
-![New Beginnings v283, May 2015](https://miro.medium.com/v2/resize:fit:1400/format:webp/1*00G4bwpwYowa6Fubpta6pQ.png)
+![New Beginnings v283, May 2015](/assets/medium/new-beginnings/01.webp)
 
 
 So, I’m going for a manifesto of sorts. Things I want to be doing in the next few days/years/crogenic-defrostings/consciousness-downloadings.
@@ -40,7 +44,7 @@ I think you can do that by doing bold work. I’ve realised that’s what turns 
 
 [placeholder for transcendental]
 
-![This should be everywhere. source: markmalazarte.com/jarmusch/](https://miro.medium.com/v2/resize:fit:1400/format:webp/1*KKlyMGIgrv2CbjmWHlqaDQ.jpeg)
+![This should be everywhere. source: markmalazarte.com/jarmusch/](/assets/medium/new-beginnings/02.webp)
 
 
 
@@ -69,7 +73,7 @@ So now I plan to immerse myself as much as possible into the ideas of the Stanfo
 illing in the form for applying to the Interaction Design M.Des Course at IIT Bombay, I realised that the question, why do you want to be an interaction designer, really fucked me up.
 
 
-![](https://miro.medium.com/v2/resize:fit:4800/format:webp/1*H49t-JOxSvNs3MJO5Xnw0w.png)
+![](/assets/medium/new-beginnings/03.webp)
 
 And then, there was a task. Give two examples of Indian Interaction Designs that are either really bad, or really good.
 
